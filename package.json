@@ -32,6 +32,7 @@
   "homepage": "https://github.com/platformatic/semgrator#readme",
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
+    "@matteo.collina/tspl": "^0.1.1",
     "@types/node": "^20.11.24",
     "borp": "^0.9.1",
     "prettier": "^3.2.5",
@@ -53,5 +54,9 @@
   ],
   "type": "module",
   "main": "./dist/semgrator.js",
-  "types": "./dist/semgrator.d.ts"
+  "types": "./dist/semgrator.d.ts",
+  "dependencies": {
+    "@types/semver": "^7.5.8",
+    "semver": "^7.6.0"
+  }
 }
