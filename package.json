@@ -1,11 +1,11 @@
 {
   "name": "semgrator",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Run migrations code based on semantic version rules",
   "scripts": {
     "test": "borp",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && tsc -p tsconfig.build.json",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
     "lint": "prettier --check .",
     "lint:fix": "prettier -w ."
   },

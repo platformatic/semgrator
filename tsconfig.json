@@ -1,8 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "build",
     "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

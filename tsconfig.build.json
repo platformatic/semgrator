@@ -1,8 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./tsconfig.json",
-  "exclude": ["test"],
+  "exclude": ["src/test"],
   "compilerOptions": {
+    "outDir": "dist",
     "incremental": false
   }
 }
