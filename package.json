@@ -1,11 +1,11 @@
 {
   "name": "semgrator",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Run migrations code based on semantic version rules",
   "scripts": {
     "test": "borp",
-    "clean": "rm -rf dist && rm -rf build",
-    "prepublishOnly": "tshy",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && tsc -p tsconfig.build.json",
     "lint": "prettier --check .",
     "lint:fix": "prettier -w ."
   },
@@ -35,7 +35,6 @@
     "@types/node": "^20.11.24",
     "borp": "^0.9.1",
     "prettier": "^3.2.5",
-    "tshy": "^1.11.1",
     "typescript": "^5.3.3"
   },
   "prettier": {
@@ -49,32 +48,10 @@
     "arrowParens": "avoid",
     "endOfLine": "lf"
   },
-  "tshy": {
-    "exports": {
-      "./package.json": "./package.json",
-      ".": "./src/lib/semgrator.ts"
-    },
-    "exclude": [
-      "test/**"
-    ]
-  },
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "import": {
-        "types": "./dist/esm/lib/semgrator.d.ts",
-        "default": "./dist/esm/lib/semgrator.js"
-      },
-      "require": {
-        "types": "./dist/commonjs/lib/semgrator.d.ts",
-        "default": "./dist/commonjs/lib/semgrator.js"
-      }
-    }
-  },
   "files": [
     "dist"
   ],
   "type": "module",
-  "main": "./dist/commonjs/lib/semgrator.js",
-  "types": "./dist/commonjs/lib/semgrator.d.ts"
+  "main": "./dist/semgrator.js",
+  "types": "./dist/semgrator.d.ts"
 }
