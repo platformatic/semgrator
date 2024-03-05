@@ -1,6 +1,6 @@
 {
   "name": "semgrator",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Run migrations code based on semantic version rules",
   "scripts": {
     "test": "borp",
