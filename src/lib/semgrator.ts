@@ -14,9 +14,9 @@ interface BaseSemgratorParams<Input> {
   input: Input
 }
 
-interface SemgratorParamsWithMigrations<Input>
+interface SemgratorParamsWithMigrations<Input, Output>
   extends BaseSemgratorParams<Input> {
-  migrations: Migration<Input>[]
+  migrations: Migration<Input, Output>[]
 }
 
 interface SemgratorParamsWithPath<Input>
@@ -30,7 +30,7 @@ interface SemgratorResult<Output> {
 }
 
 async function semgratorWithMigrations<Input, Output>(
-  params: SemgratorParamsWithMigrations<Input>,
+  params: SemgratorParamsWithMigrations<Input, Output>,
 ): Promise<SemgratorResult<Output>> {
   let result = params.input as unknown
   let lastVersion = params.version
@@ -45,9 +45,9 @@ async function semgratorWithMigrations<Input, Output>(
   return { version: lastVersion, result: result as Output }
 }
 
-async function loadMigrationsFromPath<Input>(
+async function loadMigrationsFromPath<Input, Output>(
   path: string,
-): Promise<Migration<Input>[]> {
+): Promise<Migration<Input, Output>[]> {
   const files = (await readdir(path)).filter(file =>
     file.match(/\.(c|m)?js$/),
   )
@@ -57,7 +57,8 @@ async function loadMigrationsFromPath<Input>(
       const module = await import(
         pathToFileURL(join(path, file)).toString()
       )
-      return module.migration as Migration<Input>
+      // Casted, there is nothing type safe here
+      return module.migration as Migration<Input, Output>
     }),
   )
 
@@ -69,10 +70,10 @@ async function loadMigrationsFromPath<Input>(
 export async function semgrator<Input = unknown, Output = unknown>(
   params:
     | SemgratorParamsWithPath<Input>
-    | SemgratorParamsWithMigrations<Input>,
+    | SemgratorParamsWithMigrations<Input, Output>,
 ): Promise<SemgratorResult<Output>> {
   if ('path' in params) {
-    const migrations = await loadMigrationsFromPath<Input>(
+    const migrations = await loadMigrationsFromPath<Input, Output>(
       params.path,
     )
     return semgratorWithMigrations<Input, Output>({
