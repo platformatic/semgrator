@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import { semgrator, Migration } from '../lib/semgrator.js'
 import { tspl } from '@matteo.collina/tspl'
-import { rejects } from 'node:assert/strict'
+import { throws } from 'node:assert/strict'
 
 type SeenBy = {
   foo: string
@@ -171,9 +171,11 @@ test('toVersion', async t => {
 })
 
 test('throws if path or migrations are missing', async t => {
-  await rejects(
-    // @ts-expect-error
-    semgrator({ version: '1.0.0' }),
+  throws(
+    () => {
+      // @ts-expect-error
+      semgrator({ version: '1.0.0' })
+    },
     { message: 'Specify either path or migrations' },
   )
 })
@@ -192,9 +194,11 @@ test('throws if version is missing', async t => {
       return input
     },
   }
-  await rejects(
-    // @ts-expect-error
-    semgrator({ migrations: [m1, m2] }),
+  throws(
+    () => {
+      // @ts-expect-error
+      semgrator({ migrations: [m1, m2] })
+    },
     {
       message:
         'Invalid version. Must be a string. Got type "undefined".',

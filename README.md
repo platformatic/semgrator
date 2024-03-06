@@ -65,6 +65,28 @@ const res = await semgrator<MyConfig, MyConfig>({
 console.log(res.result)
 ```
 
+### Getting intermediate results
+
+```ts
+import { semgrator } from 'semgrator'
+
+type MyConfig = {
+  result: unknown
+}
+
+const iterator = semgrator<MyConfig, MyConfig>({
+  version: '1.0.0',
+  path: 'path/to/migrations',
+  input: {
+    result: { foo: 'bar' } as unknown,
+  },
+})
+
+for await (const res of iterator) {
+  console.log(res.version, res.result)
+}
+```
+
 ## License
 
 Apache-2.0

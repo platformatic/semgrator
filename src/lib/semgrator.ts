@@ -16,7 +16,9 @@ interface BaseSemgratorParams<Input> {
 
 interface SemgratorParamsWithMigrations<Input, Output>
   extends BaseSemgratorParams<Input> {
-  migrations: Migration<Input, Output>[]
+  migrations:
+    | Migration<Input, Output>[]
+    | AsyncGenerator<Migration<Input, Output>>
 }
 
 interface SemgratorParamsWithPath<Input>
@@ -29,25 +31,26 @@ interface SemgratorResult<Output> {
   result: Output
 }
 
-async function semgratorWithMigrations<Input, Output>(
-  params: SemgratorParamsWithMigrations<Input, Output>,
-): Promise<SemgratorResult<Output>> {
-  let result = params.input as unknown
-  let lastVersion = params.version
-  for (const migration of params.migrations) {
-    if (semver.gt(migration.version, lastVersion)) {
-      // @ts-expect-error
-      result = await migration.up(result)
-      lastVersion = migration.toVersion || migration.version
-    }
-  }
-
-  return { version: lastVersion, result: result as Output }
+interface ThenableAsyncIterator<T> extends PromiseLike<T> {
+  [Symbol.asyncIterator](): AsyncIterator<T, T>
 }
 
-async function loadMigrationsFromPath<Input, Output>(
+async function processAll<Output>(
+  iterator: AsyncGenerator<SemgratorResult<Output>>,
+): Promise<SemgratorResult<Output>> {
+  let lastResult: SemgratorResult<Output> | undefined
+  do {
+    const result = await iterator.next()
+    if (result.done) {
+      return result.value || lastResult
+    }
+    lastResult = result.value
+  } while (true)
+}
+
+async function* loadMigrationsFromPath<Input, Output>(
   path: string,
-): Promise<Migration<Input, Output>[]> {
+): AsyncGenerator<Migration<Input, Output>> {
   const files = (await readdir(path)).filter(file =>
     file.match(/\.(c|m)?js$/),
   )
@@ -64,21 +67,70 @@ async function loadMigrationsFromPath<Input, Output>(
 
   migrations.sort((a, b) => semver.compare(a.version, b.version))
 
-  return migrations
+  for (const migration of migrations) {
+    yield migration
+  }
 }
 
-export async function semgrator<Input = unknown, Output = unknown>(
+async function* processMigrations<Input, Output>(
+  input: Input,
+  migrations:
+    | Migration<Input, Output>[]
+    | AsyncGenerator<Migration<Input, Output>>,
+  version: string,
+): AsyncGenerator<SemgratorResult<Output>> {
+  let result = input as unknown
+  let lastVersion = version
+
+  for await (const migration of migrations) {
+    if (semver.gt(migration.version, lastVersion)) {
+      // @ts-expect-error
+      result = await migration.up(result)
+      lastVersion = migration.toVersion || migration.version
+    }
+    yield { version: lastVersion, result: result as Output }
+  }
+}
+
+function semgratorWithMigrations<Input, Output>(
+  params: SemgratorParamsWithMigrations<Input, Output>,
+): ThenableAsyncIterator<SemgratorResult<Output>> {
+  const iterator = processMigrations(
+    params.input,
+    params.migrations,
+    params.version,
+  )
+
+  let processing: Promise<SemgratorResult<Output>> | undefined
+
+  return {
+    [Symbol.asyncIterator]() {
+      return iterator
+    },
+    then(onFulfilled, onRejected) {
+      if (!processing) {
+        processing = processAll(iterator)
+      }
+      return processing.then(onFulfilled, onRejected)
+    },
+  }
+}
+
+export function semgrator<Input = unknown, Output = unknown>(
   params:
     | SemgratorParamsWithPath<Input>
     | SemgratorParamsWithMigrations<Input, Output>,
-): Promise<SemgratorResult<Output>> {
-  if ('path' in params) {
-    const migrations = await loadMigrationsFromPath<Input, Output>(
-      params.path,
+): ThenableAsyncIterator<SemgratorResult<Output>> {
+  if (typeof params.version !== 'string') {
+    throw new Error(
+      `Invalid version. Must be a string. Got type "${typeof params.version}".`,
     )
+  }
+
+  if ('path' in params) {
     return semgratorWithMigrations<Input, Output>({
       ...params,
-      migrations,
+      migrations: loadMigrationsFromPath<Input, Output>(params.path),
     })
   } else if ('migrations' in params) {
     return semgratorWithMigrations<Input, Output>(params)
