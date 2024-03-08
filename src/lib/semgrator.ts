@@ -59,15 +59,25 @@ async function* loadMigrationsFromPath<Input, Output>(
     file.match(/\.(c|m)?js$/),
   )
 
-  const migrations = await Promise.all(
-    files.map(async file => {
-      const module = await import(
-        pathToFileURL(join(path, file)).toString()
-      )
-      // Casted, there is nothing type safe here
-      return module.migration as Migration<Input, Output>
-    }),
-  )
+  const migrations = (
+    await Promise.all(
+      files.map(async file => {
+        const module = await import(
+          pathToFileURL(join(path, file)).toString()
+        )
+        if (module.migration) {
+          // Casted, there is nothing type safe here
+          return module.migration as Migration<Input, Output>
+        } else if (
+          module.default?.version &&
+          typeof module.default?.up === 'function'
+        ) {
+          // Casted, there is nothing type safe here
+          return module.default as Migration<Input, Output>
+        }
+      }),
+    )
+  ).filter(migration => !!migration) as Migration<Input, Output>[]
 
   migrations.sort((a, b) => semver.compare(a.version, b.version))
 
