@@ -28,6 +28,7 @@ interface SemgratorParamsWithPath<Input>
 
 interface SemgratorResult<Output> {
   version: string
+  changed: boolean
   result: Output
 }
 
@@ -81,14 +82,16 @@ async function* processMigrations<Input, Output>(
 ): AsyncGenerator<SemgratorResult<Output>> {
   let result = input as unknown
   let lastVersion = version
+  let changed = false
 
   for await (const migration of migrations) {
     if (semver.gt(migration.version, lastVersion)) {
       // @ts-expect-error
       result = await migration.up(result)
       lastVersion = migration.toVersion || migration.version
+      changed = true
     }
-    yield { version: lastVersion, result: result as Output }
+    yield { version: lastVersion, result: result as Output, changed }
   }
 }
 

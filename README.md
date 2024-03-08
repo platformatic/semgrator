@@ -63,6 +63,8 @@ const res = await semgrator<MyConfig, MyConfig>({
 })
 
 console.log(res.result)
+console.log(res.changed)
+console.log(res.version)
 ```
 
 ### Getting intermediate results

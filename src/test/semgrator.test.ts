@@ -9,7 +9,7 @@ type SeenBy = {
 }
 
 test('apply all  migrations', async t => {
-  const plan = tspl(t, { plan: 3 })
+  const plan = tspl(t, { plan: 4 })
   const m1: Migration<SeenBy> = {
     version: '2.0.0',
     async up(input) {
@@ -43,6 +43,7 @@ test('apply all  migrations', async t => {
   })
 
   plan.equal(res.version, '2.4.0')
+  plan.equal(res.changed, true)
   plan.deepEqual(res.result, {
     foo: 'bar',
     seenBy: '2.4.0',
@@ -91,7 +92,7 @@ test('apply only needed', async t => {
 })
 
 test('apply no migrations', async t => {
-  const plan = tspl(t, { plan: 2 })
+  const plan = tspl(t, { plan: 3 })
   const m1: Migration<SeenBy> = {
     version: '2.0.0',
     async up(input) {
@@ -123,6 +124,7 @@ test('apply no migrations', async t => {
   })
 
   plan.equal(res.version, '2.30.1')
+  plan.equal(res.changed, false)
   plan.deepEqual(res.result, {
     foo: 'bar',
   })
