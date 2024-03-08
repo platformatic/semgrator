@@ -2,13 +2,17 @@ import { test } from 'node:test'
 import { semgrator, Migration } from '../lib/semgrator.js'
 import { tspl } from '@matteo.collina/tspl'
 import { throws } from 'node:assert/strict'
+import { equal, deepEqual } from 'node:assert/strict'
 
 type SeenBy = {
   foo: string
   seenBy?: string
+  deep?: {
+    seenBy?: string
+  }
 }
 
-test('apply all  migrations', async t => {
+test('apply all migrations', async t => {
   const plan = tspl(t, { plan: 4 })
   const m1: Migration<SeenBy> = {
     version: '2.0.0',
@@ -206,4 +210,45 @@ test('throws if version is missing', async t => {
         'Invalid version. Must be a string. Got type "undefined".',
     },
   )
+})
+
+test('clones at each step', async t => {
+  const m1: Migration<SeenBy> = {
+    version: '2.0.0',
+    async up(input) {
+      input.seenBy = '2.0.0'
+      input.deep ||= {}
+      input.deep.seenBy = '2.0.0'
+      return input
+    },
+  }
+
+  const input = {
+    foo: 'bar',
+    deep: {
+      seenBy: '1.0.0',
+    },
+  }
+
+  const res = await semgrator<SeenBy, SeenBy>({
+    version: '1.0.0',
+    migrations: [m1],
+    input,
+  })
+
+  equal(res.version, '2.0.0')
+  equal(res.changed, true)
+  deepEqual(res.result, {
+    foo: 'bar',
+    seenBy: '2.0.0',
+    deep: {
+      seenBy: '2.0.0',
+    },
+  })
+  deepEqual(input, {
+    foo: 'bar',
+    deep: {
+      seenBy: '1.0.0',
+    },
+  })
 })

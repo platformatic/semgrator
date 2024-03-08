@@ -2,6 +2,9 @@ import semver from 'semver'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { readdir } from 'node:fs/promises'
+import rfdc from 'rfdc'
+
+const clone = rfdc()
 
 export type Migration<Input, Output = Input> = {
   version: string
@@ -87,7 +90,7 @@ async function* processMigrations<Input, Output>(
   for await (const migration of migrations) {
     if (semver.gt(migration.version, lastVersion)) {
       // @ts-expect-error
-      result = await migration.up(result)
+      result = await migration.up(clone(result))
       lastVersion = migration.toVersion || migration.version
       changed = true
     }
