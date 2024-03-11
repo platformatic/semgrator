@@ -1,5 +1,8 @@
 import { test } from 'node:test'
-import { semgrator } from '../lib/semgrator.js'
+import {
+  semgrator,
+  loadMigrationsFromPath,
+} from '../lib/semgrator.js'
 import { join } from 'desm'
 import type { Order } from './fixtures/order.js'
 import { equal, deepEqual } from 'node:assert/strict'
@@ -48,4 +51,29 @@ test('async iterate over all migrations', async t => {
   for await (const res of iterator) {
     equal(res.version, expected.shift())
   }
+})
+
+test('load all migrations from a path', async t => {
+  const iterator = loadMigrationsFromPath<Order>(
+    join(import.meta.url, 'fixtures', 'plt'),
+  )
+
+  const migrations = []
+
+  for await (const migration of iterator) {
+    migrations.push(migration)
+  }
+
+  const res = await semgrator<Order>({
+    version: '0.15.0',
+    migrations,
+    input: {
+      order: [],
+    },
+  })
+
+  equal(res.version, '1.42.0')
+  deepEqual(res.result, {
+    order: ['0.16.0', '0.17.0', '0.18.0', '1.0.0'],
+  })
 })

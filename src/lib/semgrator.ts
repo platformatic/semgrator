@@ -52,7 +52,7 @@ async function processAll<Output>(
   } while (true)
 }
 
-async function* loadMigrationsFromPath<Input, Output>(
+export async function* loadMigrationsFromPath<Input, Output = Input>(
   path: string,
 ): AsyncGenerator<Migration<Input, Output>> {
   const files = (await readdir(path)).filter(file =>
