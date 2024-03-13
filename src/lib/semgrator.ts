@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { readdir } from 'node:fs/promises'
 import rfdc from 'rfdc'
+import abstractLogger, { AbstractLogger } from 'abstract-logging'
 
 const clone = rfdc()
 
@@ -15,6 +16,7 @@ export type Migration<Input, Output = Input> = {
 interface BaseSemgratorParams<Input> {
   version: string
   input: Input
+  logger?: AbstractLogger
 }
 
 interface SemgratorParamsWithMigrations<Input, Output>
@@ -92,6 +94,7 @@ async function* processMigrations<Input, Output>(
     | Migration<Input, Output>[]
     | AsyncGenerator<Migration<Input, Output>>,
   version: string,
+  logger: AbstractLogger,
 ): AsyncGenerator<SemgratorResult<Output>> {
   let result = input as unknown
   let lastVersion = version
@@ -99,6 +102,8 @@ async function* processMigrations<Input, Output>(
 
   for await (const migration of migrations) {
     if (semver.gt(migration.version, lastVersion)) {
+      logger.info(`Migrating to version ${migration.version}`)
+
       // @ts-expect-error
       result = await migration.up(clone(result))
       lastVersion = migration.toVersion || migration.version
@@ -115,6 +120,7 @@ function semgratorWithMigrations<Input, Output>(
     params.input,
     params.migrations,
     params.version,
+    params.logger || abstractLogger,
   )
 
   let processing: Promise<SemgratorResult<Output>> | undefined
