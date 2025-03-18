@@ -33,7 +33,7 @@
   "homepage": "https://github.com/platformatic/semgrator#readme",
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
-    "@matteo.collina/tspl": "^0.1.1",
+    "@matteo.collina/tspl": "^0.2.0",
     "@types/node": "^22.0.0",
     "@types/rfdc": "^1.2.0",
     "@types/semver": "^7.5.8",
