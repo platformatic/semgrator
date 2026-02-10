@@ -1,5 +1,6 @@
 import { test } from 'node:test'
-import { semgrator, Migration } from '../lib/semgrator.js'
+import { semgrator } from '../lib/semgrator.ts'
+import type { Migration } from '../lib/semgrator.ts'
 import { tspl } from '@matteo.collina/tspl'
 import { throws } from 'node:assert/strict'
 import { equal, deepEqual } from 'node:assert/strict'

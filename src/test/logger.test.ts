@@ -1,7 +1,8 @@
 import { test } from 'node:test'
 import { pino } from 'pino'
 import { sink, consecutive } from 'pino-test'
-import { semgrator, Migration } from '../lib/semgrator.js'
+import { semgrator } from '../lib/semgrator.ts'
+import type { Migration } from '../lib/semgrator.ts'
 
 type SeenBy = {
   foo: string

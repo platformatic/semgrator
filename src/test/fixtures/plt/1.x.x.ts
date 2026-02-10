@@ -1,5 +1,5 @@
-import type { Migration } from '../../../lib/semgrator.js'
-import type { Order } from '../order.js'
+import type { Migration } from '../../../lib/semgrator.ts'
+import type { Order } from '../order.ts'
 
 export const migration: Migration<Order> = {
   version: '1.0.0',

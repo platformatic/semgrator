@@ -2,9 +2,9 @@ import { test } from 'node:test'
 import {
   semgrator,
   loadMigrationsFromPath,
-} from '../lib/semgrator.js'
+} from '../lib/semgrator.ts'
 import { join } from 'desm'
-import type { Order } from './fixtures/order.js'
+import type { Order } from './fixtures/order.ts'
 import { equal, deepEqual } from 'node:assert/strict'
 
 test('apply all migrations in a folder', async t => {

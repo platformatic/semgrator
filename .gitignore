@@ -131,3 +131,7 @@ dist
 
 .tshy-build
 build
+
+# Local agent artifacts
+.pi/
+AGENTS.md

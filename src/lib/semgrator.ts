@@ -3,7 +3,8 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { readdir } from 'node:fs/promises'
 import rfdc from 'rfdc'
-import abstractLogger, { AbstractLogger } from 'abstract-logging'
+import abstractLogger from 'abstract-logging'
+import type { AbstractLogger } from 'abstract-logging'
 
 const clone = rfdc()
 
@@ -19,15 +20,18 @@ interface BaseSemgratorParams<Input> {
   logger?: AbstractLogger
 }
 
-interface SemgratorParamsWithMigrations<Input, Output>
-  extends BaseSemgratorParams<Input> {
+interface SemgratorParamsWithMigrations<
+  Input,
+  Output,
+> extends BaseSemgratorParams<Input> {
   migrations:
     | Migration<Input, Output>[]
     | AsyncGenerator<Migration<Input, Output>>
 }
 
-interface SemgratorParamsWithPath<Input>
-  extends BaseSemgratorParams<Input> {
+interface SemgratorParamsWithPath<
+  Input,
+> extends BaseSemgratorParams<Input> {
   path: string
 }
 
@@ -58,7 +62,7 @@ export async function* loadMigrationsFromPath<Input, Output = Input>(
   path: string,
 ): AsyncGenerator<Migration<Input, Output>> {
   const files = (await readdir(path)).filter(file =>
-    file.match(/\.(c|m)?js$/),
+    file.match(/\.(c|m)?(j|t)s$/),
   )
 
   const migrations = (
