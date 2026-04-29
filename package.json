@@ -42,7 +42,7 @@
     "pino": "^10.0.0",
     "pino-test": "^1.0.0",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.2"
+    "typescript": "^6.0.0"
   },
   "prettier": {
     "semi": false,
