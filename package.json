@@ -40,7 +40,7 @@
     "borp": "^1.0.0",
     "desm": "^1.3.1",
     "pino": "^10.0.0",
-    "pino-test": "^1.0.0",
+    "pino-test": "^2.0.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.2"
   },
